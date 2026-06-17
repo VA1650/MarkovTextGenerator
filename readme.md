@@ -1,30 +1,26 @@
-# MarkovTextGenerator — N-Gram Language Model
+# 🧠 MarkovTextGenerator — N-Gram Language Model
 
-Легковесная вероятностная языковая модель (Language Model), реализованная на чистом Python без использования тяжелых NLP-фреймворков. Генерация текста базируется на статистическом анализе N-грамм и марковских процессах (Markov Chains).
+A lightweight, probability-based language model implemented in pure Python, leveraging N-gram statistical analysis and Markov Chains.
 
-## 🧠 Математическая и алгоритмическая суть
-
-Проект реализует статистический подход к моделированию языка. Вместо вычисления сложных семантических связей, модель рассчитывает условную вероятность появления следующего слова на основе фиксированного окна предшествующего контекста (истории):
+## 🧠 Mathematical Core
+The project models language through conditional probabilities. Instead of complex semantic embedding, the model calculates the probability of the next word based on a fixed-length window of previous tokens (history):
 
 $$P(w_i | w_{i-(n-1)}, \dots, w_{i-1})$$
 
-### Особенности архитектуры:
-* **Инвариантность к размеру контекста ($N$):** Класс `NGramLanguageModel` параметризован. Изменение одной переменной переключает модель из режима биграмм ($N=2$) или триграмм ($N=3$) в режим сколь угодно глубокого контекста.
-* **Разделение фаз `fit / generate`:** Алгоритм разделен по канонам Production-моделей (наподобие интерфейсов *Scikit-learn*). Стадия токенизации и подсчета частотности распределения (`.fit()`) выполняется единожды. Последующая генерация текстов происходит за константное время $O(1)$ по выборке из хэш-таблицы (`defaultdict`).
-* **Отказоустойчивость (Dead-end Handling):** В коде предусмотрена защита от «тупиковых состояний». Если сгенерированная последовательность слов образует контекст, который в обучающей выборке встречался исключительно в конце файла (и не имеет продолжения), модель не выбрасывает исключение, а производит мягкую интерполяцию — осуществляет случайный прыжок (случайное блуждание) на новый валидный контекст.
+### Architectural Highlights
+* **Context Scalability ($N$):** The `NGramLanguageModel` class is fully parameterized. Switching between bigrams ($N=2$), trigrams ($N=3$), or deeper contexts requires only a single variable change.
+* **Fit/Generate Lifecycle:** Built with a Scikit-learn style interface. Tokenization and frequency distribution modeling (`.fit()`) are isolated from inference. Generation is optimized to $O(1)$ lookup time using hash tables (`defaultdict`).
+* **Dead-end Handling:** Implements "back-off" logic. If the model reaches a state with no known successors, it performs a random walk to a valid state, preventing termination and ensuring continuous text generation.
 
-## 📈 Сравнение контекста (Биграммы vs Триграммы)
+## 📈 Context Comparison (Bigrams vs. Trigrams)
+* **Bigrams ($N=2$):** 1-word context. High entropy, resulting in grammatically loose but highly variable sequences.
+* **Trigrams ($N=3$):** 2-word context. Improved local coherence, preserving idioms and fundamental syntax of the source corpus.
 
-* **Bigrams ($N=2$):** Контекст состоит из 1 слова. Модель обладает высокой энтропией (хаотичностью). Текст получается грамматически несвязным, но демонстрирует высокую вариативность словосочетаний.
-* **Trigrams ($N=3$):** Контекст состоит из 2 слов. Заметно повышается локальная связность текста, сохраняются устойчивые фразеологизмы и базовые синтаксические конструкции оригинального автора.
-
-## 🚀 Как запустить
-
-Проект написан с использованием встроенных библиотек Python и не требует установки сторонних пакетов (`no-dependencies`).
-
-1. Положите текстовый файл для обучения (например, корпус стихов или прозы) в корень проекта под именем `text.txt`.
-2. Запустите скрипт:
+## 🚀 Quick Start
+No external dependencies required (Pure Python).
+1. Place your training corpus in `text.txt`.
+2. Run the generator:
 ```bash
 python markov_generator.py
 ```
-3. Результат генерации запишется в файл generated_text.txt
+3. The generated output will be stored in generated_text.txt
